@@ -1,0 +1,20 @@
+{
+  "name": "labecommerce-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MathMendesReis/labecommerce-backend.git"
+  },
+  "keywords": [],
+  "author": "matheus mendes dos reis",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MathMendesReis/labecommerce-backend/issues"
+  },
+  "homepage": "https://github.com/MathMendesReis/labecommerce-backend#readme"
+}
