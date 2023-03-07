@@ -1,4 +1,4 @@
-import { products, users } from './database'
+import { products, users, purchase } from './database'
 
 export type TUser = {
     // tipagem dos objetos
@@ -26,7 +26,9 @@ export enum CATEGORYS {
 }
 
 
+//exercicio 002
 export function createUser(id: string, name: string, email: string, password: string, createdAt: string): void {
+    //funcao que cria usuario
     const newUser: TUser = {
         id: id,
         name: name,
@@ -40,11 +42,13 @@ export function createUser(id: string, name: string, email: string, password: st
 
 
 export function getAllUsers(array: TUser[]): void {
+    //funcao que retorna todos os usuarios
     return console.table(array)
 }
 
 
 export function createProduct(id: string, name: string, price: number, description: string, imageUrl: string, category: CATEGORYS): void {
+    //funcao que cria produto
     const newProduct: TProduct = {
         id: id,
         name: name,
@@ -59,10 +63,12 @@ export function createProduct(id: string, name: string, price: number, descripti
 
 
 export function getAllProducts(array: TProduct[]): void {
+    //funcao que retorna todos os produtos
     return console.log(array)
 }
 
 export function getAllProductsById(array: TProduct[], id: string): void {
+    //funcao que pega produto por id
     const newArray = array.filter((p) => p.id === id)
     if (newArray.length > 0) {
         return console.table(newArray)
@@ -71,7 +77,10 @@ export function getAllProductsById(array: TProduct[], id: string): void {
     }
 }
 
+//exercicio 003
+
 export function queryProductsByName(array: TProduct[], name: string): void | string {
+    // funcao que filtra produto por nome
     const arrayName = array.filter((n) => n.name === name)
     if (arrayName.length > 0) {
         return console.table(arrayName)
@@ -79,4 +88,28 @@ export function queryProductsByName(array: TProduct[], name: string): void | str
         return console.log('produto não encontrado')
 
     }
+}
+
+export type TPurchase = {
+    id: string,
+    productId: string,
+    quantity: number
+    totalPrice: number
+}
+
+export function createPurchase(userId: string, productId: string, quantity: number, totalPrice: number) {
+    //funcao que guarda compra do usuario
+    const newPurchase: TPurchase = {
+        id: userId,
+        productId: productId,
+        quantity: quantity,
+        totalPrice: totalPrice
+    }
+    purchase.push(newPurchase)
+    return console.log(newPurchase)
+}
+
+export function getAllPurchasesFromUserId(userId: string): void {
+    const purchaseUserId = purchase.filter((id) => id.id === userId)
+    return console.log(purchaseUserId)
 }

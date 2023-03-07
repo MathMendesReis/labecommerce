@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.products = exports.users = void 0;
+exports.purchase = exports.products = exports.users = void 0;
 exports.users = [
     {
         id: "u001",
@@ -20,4 +20,5 @@ exports.products = [
         category: ''
     }
 ];
+exports.purchase = [];
 //# sourceMappingURL=database.js.map

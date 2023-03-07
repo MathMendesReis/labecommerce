@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.queryProductsByName = exports.getAllProductsById = exports.getAllProducts = exports.createProduct = exports.getAllUsers = exports.createUser = exports.CATEGORYS = void 0;
+exports.getAllPurchasesFromUserId = exports.createPurchase = exports.queryProductsByName = exports.getAllProductsById = exports.getAllProducts = exports.createProduct = exports.getAllUsers = exports.createUser = exports.CATEGORYS = void 0;
 const database_1 = require("./database");
 var CATEGORYS;
 (function (CATEGORYS) {
@@ -61,4 +61,20 @@ function queryProductsByName(array, name) {
     }
 }
 exports.queryProductsByName = queryProductsByName;
+function createPurchase(userId, productId, quantity, totalPrice) {
+    const newPurchase = {
+        id: userId,
+        productId: productId,
+        quantity: quantity,
+        totalPrice: totalPrice
+    };
+    database_1.purchase.push(newPurchase);
+    return console.log(newPurchase);
+}
+exports.createPurchase = createPurchase;
+function getAllPurchasesFromUserId(userId) {
+    const purchaseUserId = database_1.purchase.filter((id) => id.id === userId);
+    return console.log(purchaseUserId);
+}
+exports.getAllPurchasesFromUserId = getAllPurchasesFromUserId;
 //# sourceMappingURL=types.js.map

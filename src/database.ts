@@ -1,4 +1,4 @@
-import { TUser, TProduct, CATEGORYS } from "./types"
+import { TUser, TProduct, CATEGORYS, TPurchase } from "./types"
 
 export const users: TUser[] = [
     {
@@ -20,4 +20,6 @@ export const products: TProduct[] = [
         category: ''
     }
 ]
+
+export const purchase: TPurchase[] = []
 
