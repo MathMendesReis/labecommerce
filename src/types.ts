@@ -103,7 +103,7 @@ export function createPurchase(userId: string, productId: string, quantity: numb
         id: userId,
         productId: productId,
         quantity: quantity,
-        totalPrice: totalPrice
+        // totalPrice: totalPrice
     }
     purchase.push(newPurchase)
     return console.log(newPurchase)
@@ -113,3 +113,4 @@ export function getAllPurchasesFromUserId(userId: string): void {
     const purchaseUserId = purchase.filter((id) => id.id === userId)
     return console.log(purchaseUserId)
 }
+
