@@ -1,10 +1,135 @@
-import { createUser, getAllUsers, createProduct, CATEGORYS, getAllProducts, getAllProductsById, queryProductsByName, createPurchase, getAllPurchasesFromUserId } from './types'
-import { products, users } from './database'
-createUser("u003", "beltrano@email.com", "beltrano99", '123456', '')
-getAllUsers(users)
-createProduct('002', 'smartphone', 2999, 'Smartphone samsung galaxy 2', 'img', CATEGORYS.ELECTRONICS)
-getAllProducts(products)
-getAllProductsById(products, 'prod003')
-queryProductsByName(products, '')
-createPurchase(users[0].id, products[0].id, 5, 2999)
-getAllPurchasesFromUserId(users[0].id)
+import { users, products } from "./database";
+
+//importando o express 👇🏽
+import express, { Response, Request } from "express";
+import cors from 'cors'
+import { TProduct, TUser } from "./types";
+
+//Criacao do servidor 👇🏽
+const app = express()
+
+// configuracao que garante que nossas respostas estejam sempre no formato json
+
+app.use(express.json())
+
+app.use(cors())
+
+
+app.listen(3003, () => {
+    console.log('Servidor rodando na porta 3003')
+})
+
+app.get('/ping', (req: Request, res: Response) => {
+    //endpoint teste
+    res.send('pong')
+})
+
+
+app.get('/users', (req: Request, res: Response) => {
+
+    // Get All Users
+    // method HTTP(GET)
+    // path("/users")
+    // response
+    // status 200
+    // array de users do database.ts
+
+    res.status(200).send(users)
+})
+
+app.get('/products', (req: Request, res: Response) => {
+
+    //Get All Products
+    // method HTTP(GET)
+    //path("/products")
+    //response
+    // status 200
+    // array de products do database.ts
+
+    res.status(200).send(products)
+})
+
+
+app.get('/product/search', (req: Request, res: Response) => {
+    // method HTTP(GET)
+    // path("/product/search")
+    // query params
+    // q
+    // response
+    // status 200
+    // array do resultado da busca
+    const q = req.query.name as string
+    const searchName = users.filter((user) => {
+        return user.name.toLowerCase().includes(q.toLowerCase())
+    })
+    res.status(200).send(searchName)
+})
+
+
+app.post('/users', (req: Request, res: Response) => {
+
+    const { id, name, email, password, createdAt } = req.body
+    const newUser: TUser = {
+        id,
+        name,
+        email,
+        password,
+        createdAt
+    }
+
+    users.push(newUser)
+
+    res.status(201).send('Cadastro realizado com sucesso!')
+    // method HTTP(POST)
+    // path("/users")
+    // body
+    // id
+    // email
+    // password
+    // response
+    // status 201
+    // "Cadastro realizado com sucesso"
+
+})
+
+app.post('/products', (req: Request, res: Response) => {
+
+    // Create Product
+    // method HTTP(POST)
+    // path("/products")
+    // body
+    // id
+    // name
+    // price
+    // category
+    // response
+    // status 201
+    // "Produto cadastrado com sucesso"
+
+    const { id, name, price, description, imageUrl, category } = req.body
+    const newProduct: TProduct = {
+        id,
+        name,
+        price,
+        description,
+        imageUrl,
+        category,
+    }
+
+    products.push(newProduct)
+
+    res.status(201).send("Produto cadastrado com sucesso")
+})
+
+
+// Create Purchase
+// method HTTP(POST)
+// path("/purchases")
+// body
+// userId
+// productId
+// quantity
+// totalPrice
+// response
+// status 201
+// "Compra realizada com sucesso"
