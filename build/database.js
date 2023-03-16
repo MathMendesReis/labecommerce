@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.purchase = exports.products = exports.users = void 0;
+const types_1 = require("./types");
 exports.users = [
     {
         id: "u001",
@@ -17,7 +18,7 @@ exports.products = [
         price: 200,
         description: "Teclado mecânico com numpad",
         imageUrl: "https://picsum.photos/seed/Teclado%20gamer/400",
-        category: ''
+        category: types_1.CATEGORYS.ELECTRONICS
     }
 ];
 exports.purchase = [];

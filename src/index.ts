@@ -1,9 +1,9 @@
-import { users, products } from "./database";
+import { users, products, purchase } from "./database";
 
 //importando o express 👇🏽
 import express, { Response, Request } from "express";
 import cors from 'cors'
-import { TProduct, TUser } from "./types";
+import { TProduct, TPurchase, TUser } from "./types";
 
 //Criacao do servidor 👇🏽
 const app = express()
@@ -59,8 +59,8 @@ app.get('/product/search', (req: Request, res: Response) => {
     // status 200
     // array do resultado da busca
     const q = req.query.name as string
-    const searchName = users.filter((user) => {
-        return user.name.toLowerCase().includes(q.toLowerCase())
+    const searchName = products.filter((product) => {
+        return product.name.toLowerCase().includes(q.toLowerCase())
     })
     res.status(200).send(searchName)
 })
@@ -122,14 +122,41 @@ app.post('/products', (req: Request, res: Response) => {
 })
 
 
-// Create Purchase
-// method HTTP(POST)
-// path("/purchases")
-// body
-// userId
-// productId
-// quantity
-// totalPrice
-// response
-// status 201
-// "Compra realizada com sucesso"
+
+app.post('/purchases', (req: Request, res: Response) => {
+    // Create Purchase
+    // method HTTP(POST)
+    // path("/purchases")
+    // body
+    // userId
+    // productId
+    // quantity
+    // totalPrice
+    // response
+    // status 201
+    // "Compra realizada com sucesso"
+    const { userId, productId, quantity, totalPrice } = req.body
+    const newPurchase: TPurchase = {
+        userId,
+        productId,
+        quantity,
+        totalPrice
+    }
+
+    purchase.push(newPurchase)
+    res.status(201).send("Compra realizada com sucesso")
+})
+
+
+//Get Products by id
+
+app.get('/products/:id', (req: Request, res: Response) => {
+    const id = req.params.id as string
+    const product = products.find((product) => { return product.id === id })
+
+    product ?
+        res.status(200).send(product)
+        :
+        res.status(200).send("objeto do produto não encontrado")
+
+})

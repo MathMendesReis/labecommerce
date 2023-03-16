@@ -17,7 +17,7 @@ export const products: TProduct[] = [
         price: 200,
         description: "Teclado mecânico com numpad",
         imageUrl: "https://picsum.photos/seed/Teclado%20gamer/400",
-        category: ''
+        category: CATEGORYS.ELECTRONICS
     }
 ]
 
