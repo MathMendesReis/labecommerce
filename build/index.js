@@ -72,4 +72,53 @@ app.get('/products/:id', (req, res) => {
         :
             res.status(200).send("objeto do produto não encontrado");
 });
+app.get('/users/:id/purchases', (req, res) => {
+    res.status(200).send();
+});
+app.delete('/users/:id', (req, res) => {
+    const id = req.params.id;
+    const index = database_1.users.findIndex((user) => user.id === id);
+    index === -1 ?
+        (res.status(404).send('usuario nao encontrado'))
+        :
+            (database_1.users.splice(index, 1), res.status(200).send("User apagado com sucesso"));
+});
+app.delete('/products/:id', (req, res) => {
+    const id = req.params.id;
+    const index = database_1.products.findIndex((product) => product.id === id);
+    index === -1 ?
+        (res.status(404).send('Produto nao encontrado'))
+        :
+            (database_1.users.splice(index, 1), res.status(200).send("Produto apagado com sucesso"));
+});
+app.put('/users/:id', (req, res) => {
+    const id = req.params.id;
+    const newName = req.body.name;
+    const newEmail = req.body.email;
+    const newPassword = req.body.password;
+    const user = database_1.users.find((user) => user.id === id);
+    user ? (user.id = user.id,
+        user.name = newName || user.name,
+        user.email = newEmail || user.email,
+        user.password = newPassword || user.password,
+        user.createdAt = user.createdAt,
+        res.status(200).send("Atualização realizada com sucesso"))
+        :
+            (res.status(200).send("Usuario não encontrado"));
+});
+app.put('/products/:id', (req, res) => {
+    const id = req.params.id;
+    const newName = req.body.name;
+    const newPrice = req.body.number;
+    const newDescripition = req.body.description;
+    const newCategory = req.body.category;
+    const product = database_1.products.find((product) => product.id === id);
+    product ? (product.name = newName || product.name,
+        product.price = newPrice || product.price,
+        product.description = newDescripition || product.description,
+        product.category = newCategory || product.category,
+        res.status(200).send("Atualização realizada com sucesso"))
+        :
+            (res.status(200).send("Usuario não encontrado"));
+});
 //# sourceMappingURL=index.js.map

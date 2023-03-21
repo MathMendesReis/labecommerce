@@ -6,7 +6,7 @@ export const users: TUser[] = [
         name: "Fulano",
         email: "fulano@email.com",
         password: "fulano123",
-        createdAt: "2023-01-15 09:12:42"
+        createdAt: "2023-01-15 09:12:42",
     }
 ]
 
