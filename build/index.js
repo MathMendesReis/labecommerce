@@ -12,21 +12,42 @@ app.use((0, cors_1.default)());
 app.listen(3003, () => {
     console.log('Servidor rodando na porta 3003');
 });
-app.get('/ping', (req, res) => {
-    res.send('pong');
-});
 app.get('/users', (req, res) => {
-    res.status(200).send(database_1.users);
+    try {
+        res.status(200).send(database_1.users);
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).send(error.message);
+    }
 });
 app.get('/products', (req, res) => {
-    res.status(200).send(database_1.products);
+    try {
+        res.status(200).send(database_1.products);
+    }
+    catch (error) {
+        res.status(500).send(error.message);
+    }
 });
 app.get('/product/search', (req, res) => {
-    const q = req.query.name;
-    const searchName = database_1.products.filter((product) => {
-        return product.name.toLowerCase().includes(q.toLowerCase());
-    });
-    res.status(200).send(searchName);
+    try {
+        const q = req.query.name;
+        if (q.length <= 0) {
+            throw new Error("query params deve possuir pelo menos um caractere");
+        }
+        const searchName = database_1.products.filter((product) => {
+            return product.name.toLowerCase() === q.toLowerCase();
+        });
+        if (searchName.length > 0) {
+            res.status(200).send(searchName);
+        }
+        else {
+            res.status(200).send("produto não encontrado");
+        }
+    }
+    catch (error) {
+        res.status(500).send(error.message);
+    }
 });
 app.post('/users', (req, res) => {
     const { id, name, email, password, createdAt } = req.body;

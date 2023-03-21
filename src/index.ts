@@ -43,11 +43,31 @@ app.get('/products', (req: Request, res: Response) => {
 
 app.get('/product/search', (req: Request, res: Response) => {
     // Search Product by name
-    const q = req.query.name as string
-    const searchName = products.filter((product) => {
-        return product.name.toLowerCase().includes(q.toLowerCase())
-    })
-    res.status(200).send(searchName)
+
+    try {
+        const q = req.query.name as string
+
+        if (q === undefined) {
+            throw new Error("Necessario inserir o nome de algum produto")
+        }
+
+        if (q.length <= 0) {
+            throw new Error("query params deve possuir pelo menos um caractere")
+        }
+        const searchName = products.filter((product) => {
+            return product.name.toLowerCase() === q.toLowerCase()
+        })
+        if (searchName.length > 0) {
+            res.status(200).send(searchName)
+        } else {
+            res.status(200).send("produto não encontrado")
+        }
+    } catch (error: any) {
+        res.status(500).send(error.message)
+    }
+
+
+
 })
 
 
