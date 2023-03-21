@@ -16,7 +16,7 @@ export type TProduct = {
     price: number,
     description: string,
     imageUrl: string,
-    category: string
+    category: CATEGORYS
 }
 
 export enum CATEGORYS {
@@ -26,7 +26,7 @@ export enum CATEGORYS {
 }
 
 export type TPurchase = {
-    id: string,
+    userId: string,
     productId: string,
     quantity: number
     totalPrice: number
