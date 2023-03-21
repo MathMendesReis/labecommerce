@@ -32,6 +32,9 @@ app.get('/products', (req, res) => {
 app.get('/product/search', (req, res) => {
     try {
         const q = req.query.name;
+        if (q === undefined) {
+            throw new Error("Necessario inserir o nome de algum produto");
+        }
         if (q.length <= 0) {
             throw new Error("query params deve possuir pelo menos um caractere");
         }
@@ -50,16 +53,40 @@ app.get('/product/search', (req, res) => {
     }
 });
 app.post('/users', (req, res) => {
-    const { id, name, email, password, createdAt } = req.body;
-    const newUser = {
-        id,
-        name,
-        email,
-        password,
-        createdAt
-    };
-    database_1.users.push(newUser);
-    res.status(201).send('Cadastro realizado com sucesso!');
+    try {
+        const id = req.body.id;
+        const name = req.body.email;
+        const password = req.body.password;
+        const email = req.body.email;
+        const DATA = new Date();
+        const dia = DATA.getDate();
+        const mes = DATA.getMonth() + 1;
+        const ano = DATA.getFullYear();
+        const isFilled = id === undefined || name === undefined || email === undefined || password === undefined;
+        if (isFilled) {
+            throw new Error("Necessario preencher todos os campos obrigatorios");
+        }
+        const isId = database_1.users.find((user) => user.id === id);
+        if (isId) {
+            throw new Error("Usuario já cadastrado");
+        }
+        const isEmail = database_1.users.find((user) => user.email === email);
+        if (isEmail) {
+            throw new Error("email já cadastrado");
+        }
+        const newUser = {
+            id,
+            name,
+            email,
+            password,
+            createdAt: `${dia}/${mes}/${ano}`
+        };
+        database_1.users.push(newUser);
+        res.status(201).send('Cadastro realizado com sucesso!');
+    }
+    catch (error) {
+        res.status(500).send(error.message);
+    }
 });
 app.post('/products', (req, res) => {
     const { id, name, price, description, imageUrl, category } = req.body;

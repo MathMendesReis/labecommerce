@@ -3,6 +3,7 @@ import { users, products, purchase } from "./database";
 import express, { Response, Request } from "express";
 import cors from 'cors'
 import { CATEGORYS, TProduct, TPurchase, TUser } from "./types";
+import { error } from "console";
 
 const app = express()
 
@@ -74,18 +75,50 @@ app.get('/product/search', (req: Request, res: Response) => {
 app.post('/users', (req: Request, res: Response) => {
     // Create User
 
-    const { id, name, email, password, createdAt } = req.body
-    const newUser: TUser = {
-        id,
-        name,
-        email,
-        password,
-        createdAt
+    try {
+        // const { id, name, email, password, createdAt } = req.body
+        const id = req.body.id as string
+        const name = req.body.email as string
+        const password = req.body.password as string
+        const email = req.body.email as string
+        const DATA = new Date();
+        const dia = DATA.getDate();
+        const mes = DATA.getMonth() + 1;
+        const ano = DATA.getFullYear();
+        const hora = DATA.getHours();
+        const minuto = DATA.getMinutes();
+        const segundo = DATA.getSeconds();
+
+
+        const isFilled = id === undefined || name === undefined || email === undefined || password === undefined
+        if (isFilled) {
+            throw new Error("Necessario preencher todos os campos obrigatorios")
+        }
+        const isId = users.find((user) => user.id === id)
+        if (isId) {
+            throw new Error("Usuario já cadastrado")
+        }
+        const isEmail = users.find((user) => user.email === email)
+        if (isEmail) {
+            throw new Error("email já cadastrado")
+        }
+
+
+        const newUser: TUser = {
+            id,
+            name,
+            email,
+            password,
+            createdAt: `${dia}/${mes}/${ano}-${hora}:${minuto}:${segundo}`
+        }
+
+        users.push(newUser)
+
+        res.status(201).send('Cadastro realizado com sucesso!')
+
+    } catch (error: any) {
+        res.status(500).send(error.message)
     }
-
-    users.push(newUser)
-
-    res.status(201).send('Cadastro realizado com sucesso!')
 
 
 })
