@@ -32,7 +32,12 @@ app.get('/users', (req: Request, res: Response) => {
 
 app.get('/products', (req: Request, res: Response) => {
     // Get All Products
-    res.status(200).send(products)
+    try {
+        res.status(200).send(products)
+
+    } catch (error: any) {
+        res.status(500).send(error.message)
+    }
 })
 
 
