@@ -7,6 +7,7 @@ import { error } from "console";
 import { privateDecrypt } from "crypto";
 import { emit } from "process";
 import { match } from "assert";
+import { type } from "os";
 
 const app = express()
 
@@ -22,6 +23,8 @@ app.listen(3003, () => {
 
 
 app.get("/users", (req: Request, res: Response) => {
+
+
     // Get All Users
     try {
         res.status(200).send(users)
@@ -220,7 +223,10 @@ app.get('/purchase', (req: Request, res: Response) => {
 app.delete('/users/:id', (req: Request, res: Response) => {
     try {
         const id = req.params.id
-        const removeUserId = users.filter((user) => user.id !== id)
+        const index = users.findIndex((user) => user.id === id)
+        if (index >= 0) {
+            users.splice(index, 1)
+        }
         res.status(200).send('Usuario removido')
     } catch (error: any) {
         if (res.statusCode === 200) {
@@ -254,15 +260,39 @@ app.delete('/products/:id', (req: Request, res: Response) => {
 app.put("/users/:id", (req: Request, res: Response) => {
     try {
         const id = req.params.id
+        const name = req.body.name as string | undefined
         const email = req.body.email as string | undefined
         const password = req.body.password as string | undefined
+
+        if (name !== undefined) {
+            if (typeof name !== undefined) {
+                throw new Error("Nome deve ser uma string")
+                res.status(401)
+            }
+        }
+
+        if (email !== undefined) {
+            if (typeof email !== "string") {
+                throw new Error("email deve ser uma string")
+                res.status(401)
+            }
+        }
+
+        if (password !== undefined) {
+            if (typeof password !== "string") {
+                throw new Error("Email deve ser uma string")
+                res.status(401)
+            }
+        }
 
         const user = users.find((user) => user.id === id)
         if (user) {
             user.id = id || user.id
+            user.name = name || user.name
             user.email = email || user.email
             user.password = password || user.password
         }
+        res.status(200).send('Usuario teva os dados atualizados')
 
     } catch (error: any) {
         if (res.statusCode === 200) {
@@ -270,5 +300,30 @@ app.put("/users/:id", (req: Request, res: Response) => {
         }
         res.send(error.message)
 
+    }
+})
+
+app.put('/products/:id', (req: Request, res: Response) => {
+    try {
+        const id = req.params.id
+        const name = req.body.name as string | undefined
+        const price = req.body.price as number | undefined
+        const category = req.body.category as CATEGORYS | undefined
+
+        const isProduct = products.find((product) => product.id === id)
+
+        if (isProduct) {
+            isProduct.id = id || isProduct.id
+            isProduct.name = name || isProduct.name
+            isProduct.price = price || isProduct.price
+            isProduct.category = category || isProduct.category
+
+        }
+        res.status(200).send('Usuario teva os dados atualizados')
+
+    } catch (error: any) {
+        if (res.statusCode === 200) {
+            res.statusCode = 500
+        }
     }
 })

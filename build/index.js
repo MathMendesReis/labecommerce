@@ -172,4 +172,89 @@ app.get('/purchase', (req, res) => {
         res.send(error.message);
     }
 });
+app.delete('/users/:id', (req, res) => {
+    try {
+        const id = req.params.id;
+        const index = database_1.users.findIndex((user) => user.id === id);
+        if (index >= 0) {
+            database_1.users.splice(index, 1);
+        }
+        res.status(200).send('Usuario removido');
+    }
+    catch (error) {
+        if (res.statusCode === 200) {
+            res.statusCode = 500;
+        }
+        res.send(error.message);
+    }
+});
+app.delete('/products/:id', (req, res) => {
+    try {
+        const id = req.params.id;
+        const index = database_1.products.findIndex((p) => p.id === id);
+        if (index >= 0) {
+            database_1.products.splice(index, 1);
+        }
+        res.status(200).send('Produto removido com sucesso');
+    }
+    catch (error) {
+        if (res.statusCode === 200) {
+            res.statusCode = 500;
+        }
+        res.send(error.message);
+    }
+});
+app.put("/users/:id", (req, res) => {
+    try {
+        const id = req.params.id;
+        const email = req.body.email;
+        const password = req.body.password;
+        if (email !== undefined) {
+            if (typeof email !== "string") {
+                throw new Error("email deve ser uma string");
+                res.status(401);
+            }
+        }
+        if (password !== undefined) {
+            if (typeof password !== "string") {
+                throw new Error("Email deve ser uma string");
+                res.status(401);
+            }
+        }
+        const user = database_1.users.find((user) => user.id === id);
+        if (user) {
+            user.id = id || user.id;
+            user.email = email || user.email;
+            user.password = password || user.password;
+        }
+        res.status(200).send('Usuario teva os dados atualizados');
+    }
+    catch (error) {
+        if (res.statusCode === 200) {
+            res.statusCode = 500;
+        }
+        res.send(error.message);
+    }
+});
+app.put('/products/:id', (req, res) => {
+    try {
+        const id = req.params.id;
+        const name = req.body.name;
+        const price = req.body.price;
+        const category = req.body.category;
+        const isProduct = database_1.products.find((product) => product.id === id);
+        if (isProduct) {
+            isProduct.id = id || isProduct.id;
+            isProduct.name = name || isProduct.name;
+            isProduct.price = price || isProduct.price;
+            isProduct.category = category || isProduct.category;
+        }
+        res.status(200).send('Usuario teva os dados atualizados');
+    }
+    catch (error) {
+        if (res.statusCode === 200) {
+            res.statusCode = 500;
+        }
+    }
+});
 //# sourceMappingURL=index.js.map
