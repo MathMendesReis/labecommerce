@@ -28,8 +28,9 @@ export enum CATEGORYS {
 export type TPurchase = {
     userId: string,
     productId: string,
-    quantity: number
-    totalPrice: number
+    quantity: number,
+    totalPrice: number,
+    products: TProduct[]
 }
 
 

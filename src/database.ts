@@ -21,5 +21,22 @@ export const products: TProduct[] = [
     }
 ]
 
-export const purchase: TPurchase[] = []
+export const purchase: TPurchase[] = [
+    {
+        userId: 'u001',
+        productId: 'prod003',
+        quantity: 1,
+        totalPrice: 200,
+        products: [
+            {
+                id: 'prod003',
+                name: 'Teclado gamer',
+                price: 200,
+                description: 'Teclado mecânico com numpad',
+                imageUrl: 'https://picsum.photos/seed/Teclado%20gamer/400',
+                category: CATEGORYS.ELECTRONICS
+            }
+        ]
+    }
+]
 

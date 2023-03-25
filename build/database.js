@@ -21,5 +21,22 @@ exports.products = [
         category: types_1.CATEGORYS.ELECTRONICS
     }
 ];
-exports.purchase = [];
+exports.purchase = [
+    {
+        userId: 'u001',
+        productId: 'prod003',
+        quantity: 1,
+        totalPrice: 200,
+        products: [
+            {
+                id: 'prod003',
+                name: 'Teclado gamer',
+                price: 200,
+                description: 'Teclado mecânico com numpad',
+                imageUrl: 'https://picsum.photos/seed/Teclado%20gamer/400',
+                category: types_1.CATEGORYS.ELECTRONICS
+            }
+        ]
+    }
+];
 //# sourceMappingURL=database.js.map
