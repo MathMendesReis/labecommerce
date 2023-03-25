@@ -12,161 +12,164 @@ app.use((0, cors_1.default)());
 app.listen(3003, () => {
     console.log('Servidor rodando na porta 3003');
 });
-app.get('/users', (req, res) => {
+app.get("/users", (req, res) => {
     try {
         res.status(200).send(database_1.users);
     }
     catch (error) {
-        console.log(error);
-        res.status(500).send(error.message);
+        res.status(400).send(error.message);
     }
 });
-app.get('/products', (req, res) => {
+app.get("/products", (req, res) => {
     try {
         res.status(200).send(database_1.products);
     }
     catch (error) {
-        res.status(500).send(error.message);
+        res.status(400).send(error.message);
     }
 });
-app.get('/product/search', (req, res) => {
+app.get('', (req, res) => {
+});
+app.get("/product/search", (req, res) => {
     try {
-        const q = req.query.name;
-        if (q === undefined) {
-            throw new Error("Necessario inserir o nome de algum produto");
-        }
-        if (q.length <= 0) {
+        const name = req.query.name;
+        if (name === undefined) {
+            res.status(422);
             throw new Error("query params deve possuir pelo menos um caractere");
         }
-        const searchName = database_1.products.filter((product) => {
-            return product.name.toLowerCase() === q.toLowerCase();
-        });
-        if (searchName.length > 0) {
-            res.status(200).send(searchName);
+        const result = database_1.products.filter((product) => product.name.toLowerCase() === name.toLowerCase());
+        if (result.length > 0) {
+            res.status(200).send(result);
         }
         else {
-            res.status(200).send("produto não encontrado");
+            res.status(200).send("Produto não cadastrado");
         }
     }
     catch (error) {
-        res.status(500).send(error.message);
+        if (res.statusCode === 200) {
+            res.statusCode = 500;
+        }
+        res.send(error.message);
     }
 });
 app.post('/users', (req, res) => {
     try {
-        const id = req.body.id;
-        const name = req.body.email;
-        const password = req.body.password;
+        const DATE = new Date();
+        let id = `u${Math.floor(Math.random() * 100)}`;
+        const name = req.body.name;
         const email = req.body.email;
-        const DATA = new Date();
-        const dia = DATA.getDate();
-        const mes = DATA.getMonth() + 1;
-        const ano = DATA.getFullYear();
-        const isFilled = id === undefined || name === undefined || email === undefined || password === undefined;
-        if (isFilled) {
-            throw new Error("Necessario preencher todos os campos obrigatorios");
+        const password = req.body.password;
+        const createdAt = `${DATE}`;
+        if (!id || !name || !email || !password) {
+            throw new Error('Necessario preencher todos os campos obrigatorios.');
         }
-        const isId = database_1.users.find((user) => user.id === id);
-        if (isId) {
-            throw new Error("Usuario já cadastrado");
-        }
-        const isEmail = database_1.users.find((user) => user.email === email);
-        if (isEmail) {
-            throw new Error("email já cadastrado");
+        if (database_1.users.some((user) => user.id === id)) {
+            while (database_1.users.find((user) => user.id === id)) {
+                id = `u${Math.floor(Math.random() * 100)}`;
+            }
         }
         const newUser = {
             id,
             name,
             email,
             password,
-            createdAt: `${dia}/${mes}/${ano}`
+            createdAt
         };
         database_1.users.push(newUser);
-        res.status(201).send('Cadastro realizado com sucesso!');
+        res.status(201).send('cadastro realizado com sucesso');
     }
     catch (error) {
-        res.status(500).send(error.message);
+        if (res.statusCode === 200) {
+            res.statusCode = 500;
+        }
+        res.send(error.message);
     }
 });
 app.post('/products', (req, res) => {
-    const { id, name, price, description, imageUrl, category } = req.body;
-    const newProduct = {
-        id,
-        name,
-        price,
-        description,
-        imageUrl,
-        category,
-    };
-    database_1.products.push(newProduct);
-    res.status(201).send("Produto cadastrado com sucesso");
+    try {
+        let id = `${Math.floor(Math.random() * 100)}`;
+        const name = req.body.name;
+        const price = req.body.price;
+        const description = req.body.description;
+        const imageUrl = req.body.imageUrl;
+        const category = req.body.category;
+        if (!name || !price || !description || !imageUrl || !category) {
+            throw new Error("Necessario preencher todos os campos obrigatorios");
+        }
+        if (database_1.products.some((user) => user.id === id)) {
+            throw new Error('Produto ja existe na base de dados');
+        }
+        const newProduct = {
+            id,
+            name,
+            price,
+            description,
+            imageUrl,
+            category
+        };
+        database_1.products.push(newProduct);
+        res.status(201).send("produto criado com sucesso");
+    }
+    catch (error) {
+        if (res.statusCode === 200) {
+            res.statusCode = 500;
+        }
+        res.send(error.message);
+    }
 });
 app.post('/purchases', (req, res) => {
-    const { userId, productId, quantity, totalPrice } = req.body;
-    const newPurchase = {
-        userId,
-        productId,
-        quantity,
-        totalPrice
-    };
-    database_1.purchase.push(newPurchase);
-    res.status(201).send("Compra realizada com sucesso");
+    try {
+        const userId = req.body.userId;
+        const productId = req.body.productId;
+        if (!userId || !productId) {
+            throw new Error('Necessario preencher todos os campos obrigatorios');
+        }
+        const isUser = database_1.users.some((user) => { user.id === userId; });
+        if (isUser) {
+            throw new Error("Usuario não esta cadastrado");
+        }
+        const prod = database_1.products.find((p) => p.id === productId);
+        if (!prod) {
+            throw new Error("Produto não esta cadastrado");
+        }
+        const isPurchase = database_1.purchase.find((p) => p.userId === userId);
+        if (isPurchase !== undefined) {
+            isPurchase.quantity += 1;
+            isPurchase.totalPrice += prod.price;
+            if (isPurchase.products.some((p) => p.id !== prod.id)) {
+                isPurchase.products = [...isPurchase.products, prod];
+            }
+            res.status(201).send("entrei no if");
+        }
+        else {
+            const newPurchase = {
+                userId,
+                productId,
+                quantity: 1,
+                totalPrice: prod.price,
+                products: []
+            };
+            newPurchase.products.push(prod);
+            database_1.purchase.push(newPurchase);
+            res.status(201).send('entrei no else');
+        }
+    }
+    catch (error) {
+        if (res.statusCode === 200) {
+            res.statusCode = 200;
+        }
+        res.send(error.message);
+    }
 });
-app.get('/products/:id', (req, res) => {
-    const id = req.params.id;
-    const product = database_1.products.find((product) => { return product.id === id; });
-    product ?
-        res.status(200).send(product)
-        :
-            res.status(200).send("objeto do produto não encontrado");
-});
-app.get('/users/:id/purchases', (req, res) => {
-    res.status(200).send();
-});
-app.delete('/users/:id', (req, res) => {
-    const id = req.params.id;
-    const index = database_1.users.findIndex((user) => user.id === id);
-    index === -1 ?
-        (res.status(404).send('usuario nao encontrado'))
-        :
-            (database_1.users.splice(index, 1), res.status(200).send("User apagado com sucesso"));
-});
-app.delete('/products/:id', (req, res) => {
-    const id = req.params.id;
-    const index = database_1.products.findIndex((product) => product.id === id);
-    index === -1 ?
-        (res.status(404).send('Produto nao encontrado'))
-        :
-            (database_1.users.splice(index, 1), res.status(200).send("Produto apagado com sucesso"));
-});
-app.put('/users/:id', (req, res) => {
-    const id = req.params.id;
-    const newName = req.body.name;
-    const newEmail = req.body.email;
-    const newPassword = req.body.password;
-    const user = database_1.users.find((user) => user.id === id);
-    user ? (user.id = user.id,
-        user.name = newName || user.name,
-        user.email = newEmail || user.email,
-        user.password = newPassword || user.password,
-        user.createdAt = user.createdAt,
-        res.status(200).send("Atualização realizada com sucesso"))
-        :
-            (res.status(200).send("Usuario não encontrado"));
-});
-app.put('/products/:id', (req, res) => {
-    const id = req.params.id;
-    const newName = req.body.name;
-    const newPrice = req.body.number;
-    const newDescripition = req.body.description;
-    const newCategory = req.body.category;
-    const product = database_1.products.find((product) => product.id === id);
-    product ? (product.name = newName || product.name,
-        product.price = newPrice || product.price,
-        product.description = newDescripition || product.description,
-        product.category = newCategory || product.category,
-        res.status(200).send("Atualização realizada com sucesso"))
-        :
-            (res.status(200).send("Usuario não encontrado"));
+app.get('/purchase', (req, res) => {
+    try {
+        res.status(200).send(database_1.purchase);
+    }
+    catch (error) {
+        if (res.statusCode === 200) {
+            res.statusCode = 500;
+        }
+        res.send(error.message);
+    }
 });
 //# sourceMappingURL=index.js.map
