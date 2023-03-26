@@ -45,8 +45,54 @@ app.get("/products", (req: Request, res: Response) => {
 })
 
 
-app.get('', (req: Request, res: Response) => {
+app.get('/products/:name', (req: Request, res: Response) => {
     // Search Product by name
+    try {
+        const name = req.params.name
+        const productById = products.find((product) => product.name.toLocaleLowerCase() === name.toLocaleLowerCase())
+
+        if (name === undefined) {
+            throw new Error('Necessario inserir NOME do Usuario.')
+            res.status(401)
+        }
+
+        if (!productById) {
+            throw new Error('Produto não foi encontrado')
+            res.status(404)
+        }
+
+        res.status(200).send(productById)
+    } catch (error: any) {
+        if (res.statusCode === 200) {
+            res.statusCode = 500
+        }
+        res.send(error.message)
+    }
+})
+
+app.get('/users/:name', (req: Request, res: Response) => {
+    try {
+        const name = req.params.name
+
+        if (name === undefined) {
+            throw new Error('Necessario inserir ID do Usuario.')
+        }
+
+        const userByName = users.find((user) => user.name === name)
+
+        if (!userByName) {
+            throw new Error('Usuario não foi encontrado')
+            res.status(404)
+        }
+
+        res.status(200).send(userByName)
+    } catch (error: any) {
+        if (res.statusCode === 200) {
+            res.statusCode = 500
+        }
+
+        res.send(error.message)
+    }
 })
 
 
@@ -187,7 +233,7 @@ app.post('/purchases', (req: Request, res: Response) => {
             if (isPurchase.products.some((p) => p.id !== prod.id)) {
                 isPurchase.products = [...isPurchase.products, prod]
             }
-            res.status(201).send("entrei no if")
+            res.status(201).send("Compra realizada com sucesso")
         } else {
             const newPurchase: TPurchase = {
                 userId,
@@ -198,7 +244,7 @@ app.post('/purchases', (req: Request, res: Response) => {
             }
             newPurchase.products.push(prod)
             purchase.push(newPurchase)
-            res.status(201).send('entrei no else')
+            res.status(201).send('Compra realizada com sucesso')
         }
     } catch (error: any) {
         if (res.statusCode === 200) {
@@ -265,7 +311,7 @@ app.put("/users/:id", (req: Request, res: Response) => {
         const password = req.body.password as string | undefined
 
         if (name !== undefined) {
-            if (typeof name !== undefined) {
+            if (typeof name !== "string") {
                 throw new Error("Nome deve ser uma string")
                 res.status(401)
             }

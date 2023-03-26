@@ -28,7 +28,46 @@ app.get("/products", (req, res) => {
         res.status(400).send(error.message);
     }
 });
-app.get('', (req, res) => {
+app.get('/products/:name', (req, res) => {
+    try {
+        const name = req.params.name;
+        const productById = database_1.products.find((product) => product.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+        if (name === undefined) {
+            throw new Error('Necessario inserir NOME do Usuario.');
+            res.status(401);
+        }
+        if (!productById) {
+            throw new Error('Produto não foi encontrado');
+            res.status(404);
+        }
+        res.status(200).send(productById);
+    }
+    catch (error) {
+        if (res.statusCode === 200) {
+            res.statusCode = 500;
+        }
+        res.send(error.message);
+    }
+});
+app.get('/users/:name', (req, res) => {
+    try {
+        const name = req.params.name;
+        if (name === undefined) {
+            throw new Error('Necessario inserir ID do Usuario.');
+        }
+        const userByName = database_1.users.find((user) => user.name === name);
+        if (!userByName) {
+            throw new Error('Usuario não foi encontrado');
+            res.status(404);
+        }
+        res.status(200).send(userByName);
+    }
+    catch (error) {
+        if (res.statusCode === 200) {
+            res.statusCode = 500;
+        }
+        res.send(error.message);
+    }
 });
 app.get("/product/search", (req, res) => {
     try {
@@ -139,7 +178,7 @@ app.post('/purchases', (req, res) => {
             if (isPurchase.products.some((p) => p.id !== prod.id)) {
                 isPurchase.products = [...isPurchase.products, prod];
             }
-            res.status(201).send("entrei no if");
+            res.status(201).send("Compra realizada com sucesso");
         }
         else {
             const newPurchase = {
@@ -151,7 +190,7 @@ app.post('/purchases', (req, res) => {
             };
             newPurchase.products.push(prod);
             database_1.purchase.push(newPurchase);
-            res.status(201).send('entrei no else');
+            res.status(201).send('Compra realizada com sucesso');
         }
     }
     catch (error) {
@@ -207,8 +246,15 @@ app.delete('/products/:id', (req, res) => {
 app.put("/users/:id", (req, res) => {
     try {
         const id = req.params.id;
+        const name = req.body.name;
         const email = req.body.email;
         const password = req.body.password;
+        if (name !== undefined) {
+            if (typeof name !== "string") {
+                throw new Error("Nome deve ser uma string");
+                res.status(401);
+            }
+        }
         if (email !== undefined) {
             if (typeof email !== "string") {
                 throw new Error("email deve ser uma string");
@@ -224,6 +270,7 @@ app.put("/users/:id", (req, res) => {
         const user = database_1.users.find((user) => user.id === id);
         if (user) {
             user.id = id || user.id;
+            user.name = name || user.name;
             user.email = email || user.email;
             user.password = password || user.password;
         }
