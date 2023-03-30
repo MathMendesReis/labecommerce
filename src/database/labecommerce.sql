@@ -34,3 +34,44 @@ values
 
 SELECT * from products;
 SELECT * from users;
+
+-- Get All Users
+SELECT * from users;
+
+-- Get All Products
+
+select * from products;
+
+-- Search Product by name
+SELECT * from products where name = "mouse";
+
+-- Create User
+INSERT INTO users(id, email, password)
+values("u004","regiane@gmail.com","regiane123");
+
+-- Create Product
+
+insert into products(id,name,price,category)
+values(
+    "prod006","Bermuda saruel",199,"Roupa"
+);
+
+-- Get product by ID
+SELECT * from products WHERE id = "prod006";
+
+-- Delete user by id
+delete from products WHERE id = "prod006";
+
+-- Edit user by id
+UPDATE users set email = "mariana@gmail.com" WHERE id = "u004";
+
+-- Edit Product by id
+UPDATE products SET name = "calça saruel" WHERE id ="prod066";
+
+-- get all user ordenado pelo email
+
+SELECT * from users ORDER BY email;
+
+-- Get All Products versão 1
+
+SELECT * from products ORDER BY price ASC LIMIT 20 ;
