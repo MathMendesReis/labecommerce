@@ -74,4 +74,29 @@ SELECT * from users ORDER BY email;
 
 -- Get All Products versão 1
 
-SELECT * from products ORDER BY price ASC LIMIT 20 ;
+-- SELECT * from products ORDER BY price ASC LIMIT 20 ;
+
+-- Get All Products versão 2
+
+-- SELECT * from products WHERE price > 100.00  and price < 300.00;
+
+
+create table purchases(
+    id text PRIMARY key UNIQUE NOT NULL,
+    total_price real not null,
+    paid integer not NULL,
+    delivered_at TEXT,
+    buyer_id TEXT not null ,
+    FOREIGN key (buyer_id) REFERENCES users(id)
+);
+
+insert into purchases(id, total_price, paid, delivered_at, buyer_id)
+VALUES
+("PUR-001",200,1,datetime('now'),"u001"),
+("PUR-002",300,1,datetime('now'),"u002"),
+("PUR-003",100,0,datetime('now'),"u003"),
+("PUR-004",400,0,datetime('now'),"u004");
+
+SELECT * from purchases 
+INNER JOIN users
+on users.id = purchases.buyer_id;
