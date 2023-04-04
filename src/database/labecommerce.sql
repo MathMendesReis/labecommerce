@@ -34,3 +34,69 @@ values
 
 SELECT * from products;
 SELECT * from users;
+
+-- Get All Users
+SELECT * from users;
+
+-- Get All Products
+
+select * from products;
+
+-- Search Product by name
+SELECT * from products where name = "mouse";
+
+-- Create User
+INSERT INTO users(id, email, password)
+values("u004","regiane@gmail.com","regiane123");
+
+-- Create Product
+
+insert into products(id,name,price,category)
+values(
+    "prod006","Bermuda saruel",199,"Roupa"
+);
+
+-- Get product by ID
+SELECT * from products WHERE id = "prod006";
+
+-- Delete user by id
+delete from products WHERE id = "prod006";
+
+-- Edit user by id
+UPDATE users set email = "mariana@gmail.com" WHERE id = "u004";
+
+-- Edit Product by id
+UPDATE products SET name = "calça saruel" WHERE id ="prod066";
+
+-- get all user ordenado pelo email
+
+SELECT * from users ORDER BY email;
+
+-- Get All Products versão 1
+
+-- SELECT * from products ORDER BY price ASC LIMIT 20 ;
+
+-- Get All Products versão 2
+
+-- SELECT * from products WHERE price > 100.00  and price < 300.00;
+
+
+create table purchases(
+    id text PRIMARY key UNIQUE NOT NULL,
+    total_price real not null,
+    paid integer not NULL,
+    delivered_at TEXT,
+    buyer_id TEXT not null ,
+    FOREIGN key (buyer_id) REFERENCES users(id)
+);
+
+insert into purchases(id, total_price, paid, delivered_at, buyer_id)
+VALUES
+("PUR-001",200,1,datetime('now'),"u001"),
+("PUR-002",300,1,datetime('now'),"u002"),
+("PUR-003",100,0,datetime('now'),"u003"),
+("PUR-004",400,0,datetime('now'),"u004");
+
+SELECT * from purchases 
+INNER JOIN users
+on users.id = purchases.buyer_id;
