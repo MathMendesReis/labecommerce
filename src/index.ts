@@ -3,11 +3,7 @@ import { users, products, purchase } from "./database";
 import express, { Response, Request } from "express";
 import cors from 'cors'
 import { CATEGORYS, TProduct, TPurchase, TUser } from "./types";
-import { error } from "console";
-import { privateDecrypt } from "crypto";
-import { emit } from "process";
-import { match } from "assert";
-import { type } from "os";
+
 
 const app = express()
 
