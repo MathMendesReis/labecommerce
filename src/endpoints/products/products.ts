@@ -16,9 +16,7 @@ router.get("/", async (req: Request, res: Response) => {
      */
 
   try {
-    const result = await db.raw(`
-            SELECT * FROM products
-        `);
+    const result = await db("products");
     res.status(200).send(result);
   } catch (error: any) {
     if (res.statusCode === 200) {
@@ -43,10 +41,7 @@ router.get("/:search", async (req: Request, res: Response) => {
 
   const search = req.params.search as string;
 
-  const result = await db.raw(`
-        SELECT * FROM products
-        WHERE LOWER(name) = LOWER('${search}')
-    `);
+  const result = await db("products").where({ name: search });
   res.status(200).send(result);
   try {
   } catch (error: any) {}
@@ -65,12 +60,29 @@ router.post("/", async (req: Request, res: Response) => {
     const name = req.body.name as string;
     const price = req.body.price as number;
 
-    await db.raw(`
-        INSERT INTO products
-        (id,name,price,description,image_url)
-        VALUES
-        ('${id}','${name}',${price})
-        `);
+    if (!id || !name || !price) {
+      res.status(400);
+      throw new Error("Dados inválidos");
+    }
+    const isProductInDB = await db("products").where({ id: id });
+    if (isProductInDB.length > 0) {
+      res.status(400);
+      throw new Error("Produto ja cadastrado");
+    }
+    if (typeof price !== "number") {
+      res.status(400);
+      throw new Error("Dados inválidos");
+    }
+    if (name.length < 3) {
+      res.status(400);
+      throw new Error("Nome precisa ter pelo menos 3 caracteres");
+    }
+    const newProduct = {
+      id: id,
+      name: name,
+      price: price,
+    };
+    await db("products").insert(newProduct);
     res.status(201).send(`Produto cadastrado com sucesso.`);
   } catch (error: any) {
     if (res.statusCode === 200) {
@@ -84,19 +96,16 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/name/:id", async (req: Request, res: Response) => {
+router.get("/search/:id", async (req: Request, res: Response) => {
   /**
      * @name Get Products by id
-        @method HTTP (GET)
+       @method HTTP (GET)
        @path ("/products/:id")
        @response status 200 objeto encontrado do arquivo .db
      */
   try {
     const id = req.params.id;
-    const result = await db.raw(`
-        SELECT * FROM products
-        WHERE id = '${id}'
-      `);
+    const result = await db("products").where({ id: id });
     res.status(201).send(result);
   } catch (error) {
     if (res.statusCode === 200) {
@@ -119,12 +128,14 @@ router.delete("/:id", async (req: Request, res: Response) => {
     @response status 200, "User apagado com sucesso"
    */
   try {
-    const id = req.params.id;
-
-    await db.raw(`
-    DELETE FROM products
-    WHERE id = '${id}'
-    `);
+    const id = req.params.id as string;
+    const [product] = await db("products").where({ id: id });
+    if (product) {
+      await db("products").del().where({ id: id });
+    } else {
+      res.status(404);
+      throw new Error("Produto não encontrado");
+    }
 
     res.status(201).send("Produto apagado com sucesso");
   } catch (error: any) {
@@ -139,12 +150,52 @@ router.delete("/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.put("/", async (req: Request, res: Response) => {
+router.put("/:id", async (req: Request, res: Response) => {
   /**
    * @method HTTP (PUT)
       @path ("/products/:id")
       @body name (parâmetro opcional) price (parâmetro opcional)category (parâmetro opcional)
       @response status 200,  "Produto atualizado com sucesso"
    */
+
+  try {
+    const id = req.params.id as string;
+
+    const name = (req.body.name as string) || undefined;
+    const price = (req.body.price as number) || undefined;
+
+    if (name !== undefined) {
+      if (typeof name !== "string") {
+        throw new Error("name precisa ser do tipo string");
+      }
+    }
+    if (price !== undefined) {
+      if (typeof price !== "number") {
+        throw new Error("price precisa ser do tipo number");
+      }
+    }
+
+    const [product] = await db("products").where({ id: id });
+
+    if (product) {
+      const updateProduct = {
+        name: name !== undefined ? name : product.name,
+        price: price !== undefined ? price : product.price,
+      };
+      await db("products").where({ id: id }).update(updateProduct);
+    } else {
+      throw new Error("id não encontrada.");
+    }
+    res.status(201).send("Produto alterado com sucesso.");
+  } catch (error: any) {
+    if (res.statusCode === 200) {
+      res.status(500);
+    }
+    if (error instanceof Error) {
+      res.send(error.message);
+    } else {
+      res.send("Erro inesperado");
+    }
+  }
 });
 export default router;

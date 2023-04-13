@@ -17,10 +17,7 @@ const knex_1 = require("../../database/knex");
 const router = express_1.default.Router();
 router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield knex_1.db.raw(`
-            SELECT * FROM users
-        `);
-        res.status(200).send(result);
+        res.status(200).send(yield (0, knex_1.db)("users"));
     }
     catch (error) {
         if (res.statusCode === 200) {
@@ -39,13 +36,31 @@ router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const id = req.body.id;
         const email = req.body.email;
         const password = req.body.password;
-        yield knex_1.db.raw(`
-        INSERT INTO users
-        (id,email,password)
-        VALUES
-        ('${id}','${email}','${password}')
-        `);
-        res.status(201).send(`Cadastro realizado com sucesso.`);
+        if (!id || !email || !password) {
+            res.status(400);
+            throw new Error("Dados inválidos");
+        }
+        const isUserInDB = yield (0, knex_1.db)("users").where({ id: id });
+        if (isUserInDB.length > 0) {
+            res.status(400);
+            throw new Error("Usuario ja esta cadastrado.");
+        }
+        const isEmailInDB = yield (0, knex_1.db)("users").where({ email: email });
+        if (isEmailInDB.length > 0) {
+            res.status(400);
+            throw new Error("Email ja esta cadastrado.");
+        }
+        if (password.length < 6) {
+            res.status(400);
+            throw new Error("A senha precisa ter no minimo 6 caracteres.");
+        }
+        const newUser = {
+            id: id,
+            email: email,
+            password: password,
+        };
+        yield (0, knex_1.db)("users").insert(newUser);
+        res.status(201).send({ message: "Cadastro realizado com sucesso!" });
     }
     catch (error) {
         if (res.statusCode === 200) {
@@ -62,10 +77,7 @@ router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 router.get("/:id/purchases", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = req.params.id;
-        const result = yield knex_1.db.raw(`
-      SELECT * FROM purchases
-      WHERE buyer = '${id}'
-    `);
+        const result = yield (0, knex_1.db)("users").where({ id: id });
         res.status(201).send(result);
     }
     catch (error) {
@@ -83,10 +95,14 @@ router.get("/:id/purchases", (req, res) => __awaiter(void 0, void 0, void 0, fun
 router.delete("/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = req.params.id;
-        yield knex_1.db.raw(`
-    DELETE FROM users
-    WHERE id = '${id}'
-    `);
+        const [user] = yield (0, knex_1.db)("users").where({ id: id });
+        if (user) {
+            yield (0, knex_1.db)("users").del().where({ id: id });
+        }
+        else {
+            res.status(404);
+            throw new Error(`Usuario não encontrado.`);
+        }
         res.status(201).send("User apagado com sucesso");
     }
     catch (error) {
@@ -106,9 +122,6 @@ router.put("/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         const id = req.params.id;
         const newEmail = req.body.newEmail || undefined;
         const newPassword = req.body.newPassword || undefined;
-        console.log(id);
-        console.log(newEmail);
-        console.log(newPassword);
         if (newEmail !== undefined) {
             if (typeof newEmail !== "string") {
                 res.status(400);
@@ -125,18 +138,13 @@ router.put("/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 throw new Error("'newPassword' deve ser string");
             }
         }
-        const [user] = yield knex_1.db.raw(`
-   SELECT * FROM users
-   WHERE id = '${id}'
-`);
+        const [user] = yield (0, knex_1.db)("users").where({ id: id });
         if (user) {
-            yield knex_1.db.raw(`
-      UPDATE users
-      SET
-      email = '${newEmail || user.email}',
-      password = '${newPassword || user.password}'
-      WHERE id = '${id}'
-   `);
+            const updatedUser = {
+                email: newEmail !== undefined ? newEmail : user.email,
+                password: newPassword !== undefined ? newPassword : user.password,
+            };
+            yield (0, knex_1.db)("users").where({ id: id }).update(updatedUser);
         }
         else {
             res.status(404);

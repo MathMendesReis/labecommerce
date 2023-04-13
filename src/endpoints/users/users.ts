@@ -13,11 +13,7 @@ router.get("/", async (req: Request, res: Response) => {
    */
 
   try {
-    const result = await db.raw(`
-            SELECT * FROM users
-        `);
-
-    res.status(200).send(result);
+    res.status(200).send(await db("users"));
   } catch (error: any) {
     if (res.statusCode === 200) {
       res.status(500);
@@ -43,14 +39,36 @@ router.post("/", async (req: Request, res: Response) => {
     const email = req.body.email as string;
     const password = req.body.password as string;
 
-    await db.raw(`
-        INSERT INTO users
-        (id,email,password)
-        VALUES
-        ('${id}','${email}','${password}')
-        `);
+    if (!id || !email || !password) {
+      res.status(400);
+      throw new Error("Dados inválidos");
+    }
 
-    res.status(201).send(`Cadastro realizado com sucesso.`);
+    const isUserInDB = await db("users").where({ id: id });
+    if (isUserInDB.length > 0) {
+      res.status(400);
+      throw new Error("Usuario ja esta cadastrado.");
+    }
+
+    const isEmailInDB = await db("users").where({ email: email });
+    if (isEmailInDB.length > 0) {
+      res.status(400);
+      throw new Error("Email ja esta cadastrado.");
+    }
+    if (password.length < 6) {
+      res.status(400);
+      throw new Error("A senha precisa ter no minimo 6 caracteres.");
+    }
+
+    const newUser = {
+      id: id,
+      email: email,
+      password: password,
+    };
+
+    await db("users").insert(newUser);
+
+    res.status(201).send({ message: "Cadastro realizado com sucesso!" });
   } catch (error: any) {
     if (res.statusCode === 200) {
       res.status(500);
@@ -72,10 +90,7 @@ router.get("/:id/purchases", async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
 
-    const result = await db.raw(`
-      SELECT * FROM purchases
-      WHERE buyer = '${id}'
-    `);
+    const result = await db("users").where({ id: id });
     res.status(201).send(result);
   } catch (error: any) {
     if (res.statusCode === 200) {
@@ -98,12 +113,15 @@ router.delete("/:id", async (req: Request, res: Response) => {
     @response status 200, "User apagado com sucesso"
    */
   try {
-    const id = req.params.id;
+    const id = req.params.id as string;
 
-    await db.raw(`
-    DELETE FROM users
-    WHERE id = '${id}'
-    `);
+    const [user] = await db("users").where({ id: id });
+    if (user) {
+      await db("users").del().where({ id: id });
+    } else {
+      res.status(404);
+      throw new Error(`Usuario não encontrado.`);
+    }
 
     res.status(201).send("User apagado com sucesso");
   } catch (error: any) {
@@ -132,10 +150,6 @@ router.put("/:id", async (req: Request, res: Response) => {
     const newEmail = (req.body.newEmail as string) || undefined;
     const newPassword = (req.body.newPassword as string) || undefined;
 
-    console.log(id);
-    console.log(newEmail);
-    console.log(newPassword);
-
     if (newEmail !== undefined) {
       if (typeof newEmail !== "string") {
         res.status(400);
@@ -153,19 +167,14 @@ router.put("/:id", async (req: Request, res: Response) => {
       }
     }
 
-    const [user] = await db.raw(`
-   SELECT * FROM users
-   WHERE id = '${id}'
-`);
+    const [user] = await db("users").where({ id: id });
 
     if (user) {
-      await db.raw(`
-      UPDATE users
-      SET
-      email = '${newEmail || user.email}',
-      password = '${newPassword || user.password}'
-      WHERE id = '${id}'
-   `);
+      const updatedUser = {
+        email: newEmail !== undefined ? newEmail : user.email,
+        password: newPassword !== undefined ? newPassword : user.password,
+      };
+      await db("users").where({ id: id }).update(updatedUser);
     } else {
       res.status(404);
       throw new Error("id' não encontrada");

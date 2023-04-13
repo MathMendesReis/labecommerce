@@ -20,12 +20,32 @@ router.post("/", async (req: Request, res: Response) => {
     const created_at = req.body.created_at as string;
     const paid = req.body.paid as number;
 
-    await db.raw(`
-        INSERT INTO purchases
-        (id,buyer,totalPrice,created_at,paid)
-        VALUES
-        ('${id}','${buyer}',${total_price},'${created_at}',${paid})
-        `);
+    if (!id || !buyer || isNaN(total_price) || !created_at || !isNaN(paid)) {
+      res.status(400);
+      throw new Error("Dados invalidos");
+    }
+
+    const [purchase] = await db("purchases").where({ id: id });
+    if (purchase) {
+      res.status(400);
+      throw new Error("insira um id diferente");
+    }
+
+    const isString = verifyStrings(id, buyer, created_at);
+    if (isString) {
+      res.status(400);
+      throw new Error("Os campos id, buyer e created_at devem ser strings");
+    }
+
+    const newPurchases = {
+      id: id,
+      buyer: buyer,
+      total_price: total_price,
+      created_at: created_at,
+      paid: paid,
+    };
+    await db.insert(newPurchases).into("purchases");
+
     res.status(201).send(`Compra realizada com sucesso`);
   } catch (error: any) {
     if (res.statusCode === 200) {
@@ -41,9 +61,7 @@ router.post("/", async (req: Request, res: Response) => {
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const result = await db.raw(`
-      SELECT * FROM purchases
-    `);
+    const result = await db("purchases");
 
     res.status(201).send(result);
   } catch (error: any) {

@@ -17,9 +17,7 @@ const knex_1 = require("../../database/knex");
 const router = (0, express_1.default)();
 router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield knex_1.db.raw(`
-            SELECT * FROM products
-        `);
+        const result = yield (0, knex_1.db)("products");
         res.status(200).send(result);
     }
     catch (error) {
@@ -36,10 +34,7 @@ router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 }));
 router.get("/:search", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const search = req.params.search;
-    const result = yield knex_1.db.raw(`
-        SELECT * FROM products
-        WHERE LOWER(name) = LOWER('${search}')
-    `);
+    const result = yield (0, knex_1.db)("products").where({ name: search });
     res.status(200).send(result);
     try {
     }
@@ -50,12 +45,29 @@ router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const id = req.body.id;
         const name = req.body.name;
         const price = req.body.price;
-        yield knex_1.db.raw(`
-        INSERT INTO products
-        (id,name,price,description,image_url)
-        VALUES
-        ('${id}','${name}',${price})
-        `);
+        if (!id || !name || !price) {
+            res.status(400);
+            throw new Error("Dados inválidos");
+        }
+        const isProductInDB = yield (0, knex_1.db)("products").where({ id: id });
+        if (isProductInDB.length > 0) {
+            res.status(400);
+            throw new Error("Produto ja cadastrado");
+        }
+        if (typeof price !== "number") {
+            res.status(400);
+            throw new Error("Dados inválidos");
+        }
+        if (name.length < 3) {
+            res.status(400);
+            throw new Error("Nome precisa ter pelo menos 3 caracteres");
+        }
+        const newProduct = {
+            id: id,
+            name: name,
+            price: price,
+        };
+        yield (0, knex_1.db)("products").insert(newProduct);
         res.status(201).send(`Produto cadastrado com sucesso.`);
     }
     catch (error) {
@@ -70,13 +82,10 @@ router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
     }
 }));
-router.get("/name/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/search/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = req.params.id;
-        const result = yield knex_1.db.raw(`
-        SELECT * FROM products
-        WHERE id = '${id}'
-      `);
+        const result = yield (0, knex_1.db)("products").where({ id: id });
         res.status(201).send(result);
     }
     catch (error) {
@@ -94,10 +103,14 @@ router.get("/name/:id", (req, res) => __awaiter(void 0, void 0, void 0, function
 router.delete("/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = req.params.id;
-        yield knex_1.db.raw(`
-    DELETE FROM products
-    WHERE id = '${id}'
-    `);
+        const [product] = yield (0, knex_1.db)("products").where({ id: id });
+        if (product) {
+            yield (0, knex_1.db)("products").del().where({ id: id });
+        }
+        else {
+            res.status(404);
+            throw new Error("Produto não encontrado");
+        }
         res.status(201).send("Produto apagado com sucesso");
     }
     catch (error) {
@@ -109,6 +122,46 @@ router.delete("/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* 
         }
         else {
             res.send(`Erro inesperado`);
+        }
+    }
+}));
+router.put("/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = req.params.id;
+        const name = req.body.name || undefined;
+        const price = req.body.price || undefined;
+        if (name !== undefined) {
+            if (typeof name !== "string") {
+                throw new Error("name precisa ser do tipo string");
+            }
+        }
+        if (price !== undefined) {
+            if (typeof price !== "number") {
+                throw new Error("price precisa ser do tipo number");
+            }
+        }
+        const [product] = yield (0, knex_1.db)("products").where({ id: id });
+        if (product) {
+            const updateProduct = {
+                name: name !== undefined ? name : product.name,
+                price: price !== undefined ? price : product.price,
+            };
+            yield (0, knex_1.db)("products").where({ id: id }).update(updateProduct);
+        }
+        else {
+            throw new Error("id não encontrada.");
+        }
+        res.status(201).send("Produto alterado com sucesso.");
+    }
+    catch (error) {
+        if (res.statusCode === 200) {
+            res.status(500);
+        }
+        if (error instanceof Error) {
+            res.send(error.message);
+        }
+        else {
+            res.send("Erro inesperado");
         }
     }
 }));
