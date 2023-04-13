@@ -1,6 +1,0 @@
-{
-    "problems.showCurrentInStatus": true,
-    "workbench.editor.enablePreviewFromQuickOpen": true,
-    "dart.onlyAnalyzeProjectsWithOpenFiles": true,
-    "C_Cpp.intelliSenseEngineFallback": "enabled"
-}
