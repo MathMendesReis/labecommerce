@@ -16,10 +16,9 @@ router.get("/", async (req: Request, res: Response) => {
      */
 
   try {
-    const result = await db.raw(`
-            SELECT * FROM products
-        `);
+    const result = await db("products")
     res.status(200).send(result);
+
   } catch (error: any) {
     if (res.statusCode === 200) {
       res.status(500);
@@ -31,6 +30,8 @@ router.get("/", async (req: Request, res: Response) => {
     }
   }
 });
+
+
 router.get("/:search", async (req: Request, res: Response) => {
   /**
      * @name Search Product by name
@@ -41,15 +42,34 @@ router.get("/:search", async (req: Request, res: Response) => {
         @return array do resultado da busca
     */
 
-  const search = req.params.search as string;
 
-  const result = await db.raw(`
-        SELECT * FROM products
-        WHERE LOWER(name) = LOWER('${search}')
-    `);
-  res.status(200).send(result);
   try {
-  } catch (error: any) {}
+    const search = req.params.search as string;
+    if (typeof search !== 'string') {
+      res.status(404)
+      throw new Error("Name precisa ser string.");
+
+    }
+
+    const result = await db("products").where({ name: search })
+
+    if (result.length > 0) {
+      res.status(404)
+      throw new Error("Produto não encontrado");
+
+    }
+
+    res.status(200).send(result);
+  } catch (error: any) {
+    if (res.statusCode === 200) {
+      res.status(500);
+    }
+    if (error instanceof Error) {
+      res.send(error.message);
+    } else {
+      res.send(`Error inesperado`);
+    }
+  }
 });
 
 router.post("/", async (req: Request, res: Response) => {
@@ -65,13 +85,53 @@ router.post("/", async (req: Request, res: Response) => {
     const name = req.body.name as string;
     const price = req.body.price as number;
 
-    await db.raw(`
-        INSERT INTO products
-        (id,name,price,description,image_url)
-        VALUES
-        ('${id}','${name}',${price})
-        `);
-    res.status(201).send(`Produto cadastrado com sucesso.`);
+    if (id !== undefined) {
+      if (typeof id !== 'string') {
+        res.status(400)
+        throw new Error(`ID precisa ser uma string`)
+      }
+    } else {
+      res.status(404)
+      throw new Error("ID precisa ser preenchido!");
+    }
+
+    if (id !== name) {
+      if (typeof name !== 'string') {
+        res.status(400)
+        throw new Error(`name precisa ser uma string`)
+      }
+    } else {
+      res.status(404)
+      throw new Error("name precisa ser preenchido!");
+    }
+
+    if (price !== undefined) {
+      if (typeof price !== 'number') {
+        res.status(400)
+        throw new Error(`price precisa ser uma number`)
+      }
+    } else {
+      res.status(404)
+      throw new Error("price precisa ser preenchido!");
+    }
+
+    const newProduct = {
+      id: id,
+      name: name,
+      price: price
+    }
+
+    const isProduct = await db("products").where({ id: id })
+    if (isProduct.length > 0) {
+      res.status(404)
+      throw new Error("Produto ja cadastradao");
+
+    } else {
+
+      await db("products").insert(newProduct)
+      res.status(201).send(`Produto cadastrado com sucesso.`);
+    }
+
   } catch (error: any) {
     if (res.statusCode === 200) {
       res.status(500);
@@ -93,10 +153,11 @@ router.get("/name/:id", async (req: Request, res: Response) => {
      */
   try {
     const id = req.params.id;
-    const result = await db.raw(`
-        SELECT * FROM products
-        WHERE id = '${id}'
-      `);
+    const result = await db("products").where({ id: id })
+    if (result.length <= 0) {
+      res.status(404)
+      throw new Error("Produto não cadastrado");
+    }
     res.status(201).send(result);
   } catch (error) {
     if (res.statusCode === 200) {
@@ -121,10 +182,13 @@ router.delete("/:id", async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
 
-    await db.raw(`
-    DELETE FROM products
-    WHERE id = '${id}'
-    `);
+    const isProduct = await db("products").where({ id: id })
+    if (isProduct.length <= 0) {
+      res.status(404)
+      throw new Error("Produto não encontrado");
+    }
+
+    await db("products").del().where({ id: id })
 
     res.status(201).send("Produto apagado com sucesso");
   } catch (error: any) {
@@ -139,12 +203,65 @@ router.delete("/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.put("/", async (req: Request, res: Response) => {
+router.put("/:id", async (req: Request, res: Response) => {
   /**
    * @method HTTP (PUT)
       @path ("/products/:id")
       @body name (parâmetro opcional) price (parâmetro opcional)category (parâmetro opcional)
       @response status 200,  "Produto atualizado com sucesso"
    */
+
+  try {
+    const id = req.body.id as string || undefined
+    const name = req.body.name as string || undefined
+    const price = req.body.price as number || undefined
+
+    if (id !== undefined) {
+      if (typeof id !== "string") {
+        res.status(404)
+        throw new Error("ID precisa ser uma string");
+      }
+    }
+    if (name !== undefined) {
+      if (typeof name !== "string") {
+        res.status(404)
+        throw new Error("name precisa ser uma string");
+
+      }
+    }
+    if (price !== undefined) {
+      if (typeof price !== "number") {
+        res.status(404)
+        throw new Error("price precisa ser uma number");
+
+      }
+    }
+
+    const [product] = await db("products").where({ id: id })
+
+    if (product) {
+      const updateProduct = {
+        id: id || product.id,
+        name: name || product.name,
+        price: price || product.price
+      }
+      await db("products").update(updateProduct).where({ id: id })
+    } else {
+      res.status(404)
+      throw new Error("'id' não encontrada")
+    }
+
+    res.status(201).send("Produto alterado com sucesso.")
+  }
+  catch (error: any) {
+    if (res.statusCode === 200) {
+      res.status(500)
+    }
+    if (error instanceof Error) {
+      res.send(error.message)
+    } else {
+      res.send("Error inesperado.")
+    }
+  }
 });
 export default router;
