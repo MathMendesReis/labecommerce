@@ -13,9 +13,7 @@ router.get("/", async (req: Request, res: Response) => {
    */
 
   try {
-    const result = await db.raw(`
-            SELECT * FROM users
-        `);
+    const result = await db("users")
 
     res.status(200).send(result);
   } catch (error: any) {
@@ -43,12 +41,50 @@ router.post("/", async (req: Request, res: Response) => {
     const email = req.body.email as string;
     const password = req.body.password as string;
 
-    await db.raw(`
-        INSERT INTO users
-        (id,email,password)
-        VALUES
-        ('${id}','${email}','${password}')
-        `);
+    if (id !== undefined) {
+      if (typeof id !== 'string') {
+        res.status(404)
+        throw new Error(`id tem que ser uma string`)
+      }
+    } else {
+      res.status(400)
+      throw new Error(`id não pode ser undefined`)
+    }
+
+    if (email !== undefined) {
+      if (typeof email !== 'string') {
+        res.status(404)
+        throw new Error(`email tem que ser uma string`)
+      }
+    } else {
+      res.status(400)
+      throw new Error(`email não pode ser undefined`)
+    }
+    if (password !== undefined) {
+      if (typeof password !== 'string') {
+        res.status(404)
+        throw new Error(`password tem que ser uma string`)
+      }
+    } else {
+      res.status(400)
+      throw new Error(`password não pode ser undefined`)
+    }
+
+    const [product] = await db("products").where({id:id})
+
+    if(product){
+      res.status(404)
+      throw new Error (`Produto ja cadastrado`)
+    }
+
+
+    const newProduct = {
+      id: id,
+      email: email,
+      password: password
+    }
+
+    await db("users").insert(newProduct)
 
     res.status(201).send(`Cadastro realizado com sucesso.`);
   } catch (error: any) {
@@ -72,10 +108,12 @@ router.get("/:id/purchases", async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
 
-    const result = await db.raw(`
-      SELECT * FROM purchases
-      WHERE buyer = '${id}'
-    `);
+    const result = await db("users").where({id:id})
+
+    if(result.length < 1){
+      res.status(400)
+      throw new Error(`Produto não encontrado`)
+    }
     res.status(201).send(result);
   } catch (error: any) {
     if (res.statusCode === 200) {
@@ -100,10 +138,13 @@ router.delete("/:id", async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
 
-    await db.raw(`
-    DELETE FROM users
-    WHERE id = '${id}'
-    `);
+    const [user] = await db("users").where({id:id})
+    if(user){
+      res.status(404)
+      throw new Error(`Usuario não cadastrado`)
+    }
+
+    await db("users").del().where({id:id})
 
     res.status(201).send("User apagado com sucesso");
   } catch (error: any) {
@@ -132,9 +173,6 @@ router.put("/:id", async (req: Request, res: Response) => {
     const newEmail = (req.body.newEmail as string) || undefined;
     const newPassword = (req.body.newPassword as string) || undefined;
 
-    console.log(id);
-    console.log(newEmail);
-    console.log(newPassword);
 
     if (newEmail !== undefined) {
       if (typeof newEmail !== "string") {
@@ -153,19 +191,15 @@ router.put("/:id", async (req: Request, res: Response) => {
       }
     }
 
-    const [user] = await db.raw(`
-   SELECT * FROM users
-   WHERE id = '${id}'
-`);
+    const [user] = await db("users").where({id:id})
 
     if (user) {
-      await db.raw(`
-      UPDATE users
-      SET
-      email = '${newEmail || user.email}',
-      password = '${newPassword || user.password}'
-      WHERE id = '${id}'
-   `);
+
+      const updateUser = {
+        email:newEmail || user.email,
+        password: newPassword || user.password
+      }
+      await db("users").update(updateUser).where({id:id})
     } else {
       res.status(404);
       throw new Error("id' não encontrada");
