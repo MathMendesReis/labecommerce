@@ -1,4 +1,4 @@
--- Active: 1680781516672@@127.0.0.1@3306
+-- Active: 1681775389241@@127.0.0.1@3306
 CREATE TABLE USERS (
 -- nome da tabela: users
 -- colunas da tabela:
@@ -67,4 +67,5 @@ SELECT * FROM products
         WHERE id = '67';
 
 
-SELECT * from purchases;
+SELECT * from purchases_products;
+DELETE FROM purchases;
