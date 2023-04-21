@@ -51,9 +51,9 @@ router.get("/:search", async (req: Request, res: Response) => {
 
     }
 
-    const result = await db("products").where({ name: search })
+    const result = await db("products").whereRaw("LOWER(name) = ?", search.toLowerCase())
 
-    if (result.length > 0) {
+    if (result.length < 0) {
       res.status(404)
       throw new Error("Produto não encontrado");
 
@@ -212,25 +212,20 @@ router.put("/:id", async (req: Request, res: Response) => {
    */
 
   try {
-    const id = req.body.id as string || undefined
-    const name = req.body.name as string || undefined
-    const price = req.body.price as number || undefined
+    const id = req.params.id as string
+    const newName = req.body.newName as string || undefined
+    const newPrice = req.body.newPrice as number || undefined
 
-    if (id !== undefined) {
-      if (typeof id !== "string") {
-        res.status(404)
-        throw new Error("ID precisa ser uma string");
-      }
-    }
-    if (name !== undefined) {
-      if (typeof name !== "string") {
+   
+    if (newName !== undefined) {
+      if (typeof newName !== "string") {
         res.status(404)
         throw new Error("name precisa ser uma string");
 
       }
     }
-    if (price !== undefined) {
-      if (typeof price !== "number") {
+    if (newPrice !== undefined) {
+      if (typeof newPrice !== "number") {
         res.status(404)
         throw new Error("price precisa ser uma number");
 
@@ -239,19 +234,20 @@ router.put("/:id", async (req: Request, res: Response) => {
 
     const [product] = await db("products").where({ id: id })
 
-    if (product) {
-      const updateProduct = {
-        id: id || product.id,
-        name: name || product.name,
-        price: price || product.price
-      }
-      await db("products").update(updateProduct).where({ id: id })
-    } else {
+    if (!product) {
       res.status(404)
       throw new Error("'id' não encontrada")
     }
 
-    res.status(201).send("Produto alterado com sucesso.")
+    const updateProduct = {
+      id: product.id,
+      name: newName !== undefined? newName: product.name,
+      price: newPrice !== undefined? newPrice:product.price 
+    }
+    
+    await db("products").update(updateProduct).where({ id: id })
+
+    res.status(201).send("Produto alterado com sucesso!")
   }
   catch (error: any) {
     if (res.statusCode === 200) {

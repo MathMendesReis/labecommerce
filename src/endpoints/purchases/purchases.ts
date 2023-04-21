@@ -37,6 +37,7 @@ router.post("/", async (req: Request, res: Response) => {
       res.status(404)
       throw new Error("produto não encontrado")
     }
+    
 
     const [product] = products
     const sumPriceTotal = quantity * product.price
@@ -72,6 +73,8 @@ router.post("/", async (req: Request, res: Response) => {
 
 router.get("/", async (req: Request, res: Response) => {
   try {
+
+
     const result = await db("purchases")
 
     res.status(201).send(result);
@@ -107,6 +110,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     .select()
     .where({"purchases.id":id})
     .innerJoin("users", "purchases.buyer", "=", "users.id")
+    
 
     const products = await db("purchases_products")
     .select("products.*")

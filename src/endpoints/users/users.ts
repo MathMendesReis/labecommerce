@@ -138,15 +138,15 @@ router.delete("/:id", async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
 
-    const [user] = await db("users").where({id:id})
-    if(user){
+    const isUser = await db("users").where({id:id})
+    if(isUser.length < 1){
       res.status(404)
-      throw new Error(`Usuario não cadastrado`)
+      throw new Error(`User não encontrado`)
     }
 
     await db("users").del().where({id:id})
 
-    res.status(201).send("User apagado com sucesso");
+    res.status(201).send(`Usuario excluido com sucesso.`);
   } catch (error: any) {
     if (res.statusCode === 200) {
       res.status(500);
@@ -192,20 +192,20 @@ router.put("/:id", async (req: Request, res: Response) => {
     }
 
     const [user] = await db("users").where({id:id})
+    
 
-    if (user) {
-
-      const updateUser = {
-        email:newEmail || user.email,
-        password: newPassword || user.password
-      }
-      await db("users").update(updateUser).where({id:id})
-    } else {
+    if (!user) {
       res.status(404);
       throw new Error("id' não encontrada");
-    }
+    } 
 
-    res.status(201).send("Cadastro atualizado com sucesso");
+    const updateUser = {
+      email: newEmail !== undefined?newEmail : user.email,
+      password: newPassword !==undefined? newPassword : user.password
+    }
+    await db("users").update(updateUser).where({id:id})
+
+    res.status(201).send("cadastro alterado");
   } catch (error: any) {
     if (res.statusCode === 200) {
       res.status(500);
