@@ -2,7 +2,20 @@
 
 ## Projeto proposto no Bootcamp Web Full Stack da Labenu. Nesse desafio, foi desenvolvido um backend de um e-ecommerc.
 
+### Tecnólogias utilizadas
+* ### NodeJS
+* ### Typescript
+* ### SQL e SQLite
+* ### Knex
+* ### Postman
+
 ### [Link da documentação da api](https://documenter.getpostman.com/view/24880324/2s93Y5Neew)
+
+
+
+### Diagrama do banco de dados
+
+### ![Diagrama do banco de dados](../labecommerce-backend/src/assets/Captura%20de%20tela%202023-04-22%20190758.png)
 
 ### Foram desenvolvidos os seguintes endpoints:
 
