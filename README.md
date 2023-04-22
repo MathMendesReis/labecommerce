@@ -15,9 +15,6 @@
 
 ### Diagrama do banco de dados
 
-<<<<<<< HEAD
-### ![Diagrama do banco de dados]([./labecommerce-backend/src/assets/diagramaDB.png](https://github.com/MathMendesReis/labecommerce-backend/blob/main/src/assets/diagramaDB.png))
-=======
 ![Diagrama do banco de dados](https://github.com/MathMendesReis/labecommerce-backend/blob/main/src/assets/diagramaDB.png)
 
 ### Foram desenvolvidos os seguintes endpoints:
