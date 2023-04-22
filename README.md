@@ -2,6 +2,8 @@
 
 ## Projeto proposto no Bootcamp Web Full Stack da Labenu. Nesse desafio, foi desenvolvido um backend de um e-ecommerc.
 
+### [Link da documentação da api](https://documenter.getpostman.com/view/24880324/2s93Y5Neew)
+
 ### Foram desenvolvidos os seguintes endpoints:
 
 * ### Create user
