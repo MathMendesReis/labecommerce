@@ -16,7 +16,7 @@
 ### Diagrama do banco de dados
 
 <<<<<<< HEAD
-### ![Diagrama do banco de dados](./labecommerce-backend/src/assets/diagramaDB.png)
+### ![Diagrama do banco de dados]([./labecommerce-backend/src/assets/diagramaDB.png](https://github.com/MathMendesReis/labecommerce-backend/blob/main/src/assets/diagramaDB.png))
 =======
 ![Diagrama do banco de dados](../labecommerce-backend/src/assets/Captura%20de%20tela%202023-04-22%20190758.png)
 >>>>>>> 78e80252dedee92adbcb46e43bf46b20d0cad481
