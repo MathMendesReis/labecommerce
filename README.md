@@ -15,7 +15,7 @@
 
 ### Diagrama do banco de dados
 
-### ![Diagrama do banco de dados](../labecommerce-backend/src/assets/Captura%20de%20tela%202023-04-22%20190758.png)
+![Diagrama do banco de dados](../labecommerce-backend/src/assets/Captura%20de%20tela%202023-04-22%20190758.png)
 
 ### Foram desenvolvidos os seguintes endpoints:
 
