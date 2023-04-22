@@ -127,8 +127,9 @@ router.get('/:id', async (req: Request, res: Response) => {
       throw new Error("Usuario não encontrado")
     }
 
-    const [purchase] = await db("purchases")
-    .select()
+    
+
+    const [purchase] = await db("purchases").select()
     .where({"purchases.id":id})
     .innerJoin("users", "purchases.buyer", "=", "users.id")
     
@@ -147,7 +148,6 @@ router.get('/:id', async (req: Request, res: Response) => {
         product.push(productInBDB)
     }
 
-    const totalPriceSum = products.total_price 
         
     if(!purchase){
       res.status(404)
